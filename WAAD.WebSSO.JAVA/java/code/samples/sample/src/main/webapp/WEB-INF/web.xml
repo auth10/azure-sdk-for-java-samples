@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+  <display-name>sample</display-name>
+  
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>SSL Forwarding</web-resource-name>
+      <url-pattern>/*</url-pattern>
+      <http-method>POST</http-method>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+  
+  <servlet>
+    <description></description>
+    <display-name>FederationServlet</display-name>
+    <servlet-name>FederationServlet</servlet-name>
+    <servlet-class>FederationServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>FederationServlet</servlet-name>
+    <url-pattern>/wsfed-saml</url-pattern>
+  </servlet-mapping>
+  
+  <filter>
+    <filter-name>FederationFilter</filter-name>
+    <filter-class>FederationFilter</filter-class>
+    <init-param>
+      <param-name>login-page-url</param-name>
+      <param-value>/sample/login.jsp</param-value>
+    </init-param>
+    <init-param>
+      <param-name>allowed-regex</param-name>
+      <param-value>(\/sample\/login.jsp|\/sample\/wsfed-saml|\/sample\/oauth)</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>FederationFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+</web-app>
