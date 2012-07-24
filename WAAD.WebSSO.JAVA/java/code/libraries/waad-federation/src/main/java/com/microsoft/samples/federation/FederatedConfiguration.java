@@ -94,4 +94,14 @@ public class FederatedConfiguration {
 	public String[] getAudienceUris() {
 		return this.properties.getProperty("federation.audienceuris").split("\\|");
 	}
+	
+	public Boolean getEnableManualRedirect() {
+		String manual = this.properties.getProperty("federation.enableManualRedirect");
+		if (manual != null && Boolean.parseBoolean(manual)) {
+			return true;
+		}
+		
+		return false;
+	}
+
 }

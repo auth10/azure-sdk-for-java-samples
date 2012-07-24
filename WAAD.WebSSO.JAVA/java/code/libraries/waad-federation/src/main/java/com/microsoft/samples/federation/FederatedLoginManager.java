@@ -29,7 +29,6 @@ package com.microsoft.samples.federation;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -42,7 +41,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 public class FederatedLoginManager {
-	private static final String PRINCIPAL_SESSION_VARIABLE = "FederatedPrincipal";
 	private static final DateTimeFormatter CHECKING_FORMAT = ISODateTimeFormat.dateTime().withZone(DateTimeZone.UTC);
 	
 	private HttpServletRequest request;
@@ -61,36 +59,7 @@ public class FederatedLoginManager {
 		this.listener = listener;
 	}
 
-	public FederatedPrincipal getPrincipal() {
-		return (FederatedPrincipal) request.getSession().getAttribute(PRINCIPAL_SESSION_VARIABLE);
-	}
-	
-	public List<Claim> getClaims() {
-		return normalizeClaimList(((FederatedPrincipal) request.getSession().getAttribute(PRINCIPAL_SESSION_VARIABLE)).getClaims());
-	}
-
-	private List<Claim> normalizeClaimList(List<Claim> originalList) {
-		if (originalList != null) {
-			List<Claim> normalizedList = new ArrayList<Claim>();
-
-			for (Claim currentClaim : originalList) {
-				String[] claimValues = currentClaim.getClaimValues();
-				for (String claimValue : claimValues) {
-					normalizedList.add(new Claim(currentClaim.getClaimType(), claimValue));
-				}
-			}
-			
-			return normalizedList;
-		}
-		
-		return null;
-	}
-
-	public boolean isAuthenticated() {
-		return request.getSession().getAttribute(PRINCIPAL_SESSION_VARIABLE) != null;
-	}
-
-	public final void authenticate(String token, HttpServletResponse response) throws FederationException {
+	public final FederatedPrincipal authenticate(String token, HttpServletResponse response) throws FederationException {
 		List<Claim> claims = null;
 
 		try {
@@ -105,13 +74,10 @@ public class FederatedLoginManager {
 			claims = validator.validate(token);
 
 			FederatedPrincipal principal = new FederatedPrincipal(claims);
-			request.getSession().setAttribute(PRINCIPAL_SESSION_VARIABLE, principal);
 			
 			if (listener != null) listener.OnAuthenticationSucceed(principal);
 			
-			response.setHeader("Location", request.getParameter("wctx"));
-			response.setStatus(302);
-			
+			return principal;			
 		} catch (FederationException e) {
 			throw e;
 		} catch (Exception e) {
